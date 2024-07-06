@@ -1,6 +1,14 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+      <el-form-item label="类型" prop="type">
+        <el-input
+          v-model="queryParams.type"
+          placeholder="请输入类型"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="名称" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -70,17 +78,9 @@
       <el-table-column label="餐饮娱乐id" align="center" prop="id" />
       <el-table-column label="类型" align="center" prop="type" />
       <el-table-column label="名称" align="center" prop="name" />
-      <el-table-column label="营业开始时间" align="center" prop="openingTime" width="180">
-        <template #default="scope">
-          <span>{{ parseTime(scope.row.openingTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column label="营业开始时间" align="center" prop="openingTime" />
       <el-table-column label="地址" align="center" prop="address" />
-      <el-table-column label="营业结束时间" align="center" prop="closingTime" width="180">
-        <template #default="scope">
-          <span>{{ parseTime(scope.row.closingTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column label="营业结束时间" align="center" prop="closingTime" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['entertainment:diningentertainment:edit']">修改</el-button>
@@ -100,27 +100,20 @@
     <!-- 添加或修改餐饮娱乐信息对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="diningentertainmentRef" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="类型" prop="type">
+          <el-input v-model="form.type" placeholder="请输入类型" />
+        </el-form-item>
         <el-form-item label="名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入名称" />
         </el-form-item>
         <el-form-item label="营业开始时间" prop="openingTime">
-          <el-date-picker clearable
-            v-model="form.openingTime"
-            type="date"
-            value-format="YYYY-MM-DD"
-            placeholder="请选择营业开始时间">
-          </el-date-picker>
+          <el-input v-model="form.openingTime" placeholder="请输入营业开始时间" />
         </el-form-item>
         <el-form-item label="地址" prop="address">
           <el-input v-model="form.address" placeholder="请输入地址" />
         </el-form-item>
         <el-form-item label="营业结束时间" prop="closingTime">
-          <el-date-picker clearable
-            v-model="form.closingTime"
-            type="date"
-            value-format="YYYY-MM-DD"
-            placeholder="请选择营业结束时间">
-          </el-date-picker>
+          <el-input v-model="form.closingTime" placeholder="请输入营业结束时间" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -159,7 +152,7 @@ const data = reactive({
   },
   rules: {
     type: [
-      { required: true, message: "类型不能为空", trigger: "change" }
+      { required: true, message: "类型不能为空", trigger: "blur" }
     ],
     name: [
       { required: true, message: "名称不能为空", trigger: "blur" }
