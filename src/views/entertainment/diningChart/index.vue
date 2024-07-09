@@ -1,26 +1,20 @@
 <template>
-  <div class="app-container">
+  <div className="app-container">
     <!-- Echarts 容器 -->
-    <div id="entertainment-chart" style="width: 100%; height: 1000px;"></div>
+    <div id="dining-chart" style="width: 100%; height: 1000px;"></div>
   </div>
 </template>
 
-<script setup name="EntertainmentChart">
-import { listEntertainmentChart, getEntertainmentChart, delEntertainmentChart, addEntertainmentChart, updateEntertainmentChart } from "@/api/entertainment/entertainmentChart";
-import { onMounted, onBeforeUnmount, ref, reactive, toRefs, watch } from 'vue';
+<script setup name="DiningChart">
+import {listDiningChart} from "@/api/entertainment/diningChart";
+import {onMounted, onBeforeUnmount, ref, reactive, toRefs, watch} from 'vue';
 import * as echarts from 'echarts';
 
-const { proxy } = getCurrentInstance();
+const {proxy} = getCurrentInstance();
 
-const entertainmentChartList = ref([]);
-const open = ref(false);
+const diningChartList = ref([]);
 const loading = ref(true);
-const showSearch = ref(true);
-const ids = ref([]);
-const single = ref(true);
-const multiple = ref(true);
 const total = ref(0);
-const title = ref("");
 
 const data = reactive({
   form: {},
@@ -30,26 +24,26 @@ const data = reactive({
   },
   rules: {
     name: [
-      { required: true, message: "名称不能为空", trigger: "blur" }
+      {required: true, message: "名称不能为空", trigger: "blur"}
     ],
   }
 });
 
-const { queryParams, form, rules } = toRefs(data);
+const {queryParams, form, rules} = toRefs(data);
 
-const entertainmentChartInstance = ref(null);
+const diningChartInstance = ref(null);
 
 const initChart = () => {
-  const chartDom = document.getElementById('entertainment-chart');
-  entertainmentChartInstance.value = echarts.init(chartDom);
+  const chartDom = document.getElementById('dining-chart');
+  diningChartInstance.value = echarts.init(chartDom);
 
   const option = {
     title: {
-      text: '娱乐评分图表'
+      text: '餐饮评分图表'
     },
     tooltip: {
       trigger: 'axis',
-      axisPointer: { type: 'shadow' }
+      axisPointer: {type: 'shadow'}
     },
     grid: {
       left: '3%',
@@ -104,24 +98,24 @@ const initChart = () => {
     ]
   };
 
-  entertainmentChartInstance.value.setOption(option);
+  diningChartInstance.value.setOption(option);
 };
 
 const updateChart = () => {
-  if (entertainmentChartInstance.value) {
+  if (diningChartInstance.value) {
     // 根据评分排序
-    const sortedList = [...entertainmentChartList.value].sort((a, b) => a.score - b.score);
+    const sortedList = [...diningChartList.value].sort((a, b) => a.score - b.score);
     const names = sortedList.map(item => item.name);
     const scores = sortedList.map(item => item.score);
 
     const dataWithColors = scores.map((score, index) => ({
       value: score,
       itemStyle: {
-        color: entertainmentChartInstance.value.getOption().color[index % entertainmentChartInstance.value.getOption().color.length]
+        color: diningChartInstance.value.getOption().color[index % diningChartInstance.value.getOption().color.length]
       }
     }));
 
-    entertainmentChartInstance.value.setOption({
+    diningChartInstance.value.setOption({
       yAxis: {
         data: names
       },
@@ -154,8 +148,8 @@ const updateChart = () => {
 };
 
 const resizeChart = () => {
-  if (entertainmentChartInstance.value) {
-    entertainmentChartInstance.value.resize();
+  if (diningChartInstance.value) {
+    diningChartInstance.value.resize();
   }
 };
 
@@ -169,15 +163,15 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', resizeChart);
 });
 
-watch(entertainmentChartList, () => {
+watch(diningChartList, () => {
   updateChart();
 });
 
-/** 查询娱乐汇总列表 */
+/** 查询餐饮信息列表 */
 function getList() {
   loading.value = true;
-  listEntertainmentChart(queryParams.value).then(response => {
-    entertainmentChartList.value = response.rows;
+  listDiningChart(queryParams.value).then(response => {
+    diningChartList.value = response.rows;
     total.value = response.total;
     loading.value = false;
   });
