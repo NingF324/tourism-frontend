@@ -9,14 +9,6 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="开始时间" prop="startTime">
-        <el-date-picker clearable
-          v-model="queryParams.startTime"
-          type="date"
-          value-format="YYYY-MM-DD"
-          placeholder="请选择开始时间">
-        </el-date-picker>
-      </el-form-item>
       <el-form-item label="演出场地" prop="venue">
         <el-input
           v-model="queryParams.venue"
@@ -79,13 +71,18 @@
       <el-table-column label="团体名称" align="center" prop="name" />
       <el-table-column label="开始时间" align="center" prop="startTime" width="180">
         <template #default="scope">
-          <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="演出单场时长" align="center" prop="duration" />
       <el-table-column label="演出场地" align="center" prop="venue" />
       <el-table-column label="容量" align="center" prop="capacity" />
       <el-table-column label="票价" align="center" prop="price" />
+      <el-table-column label="图片" align="center" prop="picUrl" width="100">
+        <template #default="scope">
+          <image-preview :src="scope.row.picUrl" :width="50" :height="50"/>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['entertainment:performancegroups:edit']">修改</el-button>
@@ -93,7 +90,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -109,10 +106,11 @@
           <el-input v-model="form.name" placeholder="请输入团体名称" />
         </el-form-item>
         <el-form-item label="开始时间" prop="startTime">
-          <el-date-picker clearable
+          <el-date-picker
+              format="YYYY/MM/DD HH:mm:ss"
             v-model="form.startTime"
-            type="date"
-            value-format="YYYY-MM-DD"
+            type="datetime"
+            value-format="YYYY-MM-DD H:m:s"
             placeholder="请选择开始时间">
           </el-date-picker>
         </el-form-item>
@@ -127,6 +125,9 @@
         </el-form-item>
         <el-form-item label="票价" prop="price">
           <el-input v-model="form.price" placeholder="请输入票价" />
+        </el-form-item>
+        <el-form-item label="图片" prop="picUrl">
+          <image-upload v-model="form.picUrl"/>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -160,7 +161,6 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     name: null,
-    startTime: null,
     venue: null,
   },
   rules: {
@@ -171,7 +171,7 @@ const data = reactive({
       { required: true, message: "开始时间不能为空", trigger: "blur" }
     ],
     duration: [
-      { required: true, message: "演出单场时长不能为空", trigger: "blur" }
+      { required: true, message: "演出单场时间不能为空", trigger: "blur" }
     ],
     venue: [
       { required: true, message: "演出场地不能为空", trigger: "blur" }
@@ -181,7 +181,7 @@ const data = reactive({
     ],
     price: [
       { required: true, message: "票价不能为空", trigger: "blur" }
-    ]
+    ],
   }
 });
 
@@ -212,7 +212,8 @@ function reset() {
     duration: null,
     venue: null,
     capacity: null,
-    price: null
+    price: null,
+    picUrl: null
   };
   proxy.resetForm("performancegroupsRef");
 }
