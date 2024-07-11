@@ -1,14 +1,6 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="投诉id" prop="complaintId">
-        <el-input
-          v-model="queryParams.complaintId"
-          placeholder="请输入投诉id"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="处理人id" prop="handlerId">
         <el-input
           v-model="queryParams.handlerId"
@@ -69,21 +61,26 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="处理结果id" align="center" prop="id" />
       <el-table-column label="投诉id" align="center" prop="complaintId" />
-      <el-table-column label="结果" align="center" prop="result" />
+      <el-table-column label="内容" align="center" prop="result" />
       <el-table-column label="处理时间" align="center" prop="handleTime" width="180">
         <template #default="scope">
           <span>{{ parseTime(scope.row.handleTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="处理人id" align="center" prop="handlerId" />
+      <el-table-column label="图片" align="center" prop="picUrl" width="100">
+        <template #default="scope">
+          <image-preview :src="scope.row.picUrl" :width="50" :height="50"/>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['complaint:handlingresults:edit']">修改</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['complaint:handlingresults:edit']">处理</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['complaint:handlingresults:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -92,13 +89,13 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改投诉处理信息对话框 -->
+    <!-- 添加或修改投诉处理结果对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="handlingresultsRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="投诉id" prop="complaintId">
           <el-input v-model="form.complaintId" placeholder="请输入投诉id" />
         </el-form-item>
-        <el-form-item label="结果" prop="result">
+        <el-form-item label="内容" prop="result">
           <el-input v-model="form.result" type="textarea" placeholder="请输入内容" />
         </el-form-item>
         <el-form-item label="处理时间" prop="handleTime">
@@ -111,6 +108,9 @@
         </el-form-item>
         <el-form-item label="处理人id" prop="handlerId">
           <el-input v-model="form.handlerId" placeholder="请输入处理人id" />
+        </el-form-item>
+        <el-form-item label="图片" prop="picUrl">
+          <image-upload v-model="form.picUrl"/>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -143,28 +143,19 @@ const data = reactive({
   queryParams: {
     pageNum: 1,
     pageSize: 10,
-    complaintId: null,
-    handlerId: null
+    result: null,
+    handlerId: null,
   },
   rules: {
     complaintId: [
       { required: true, message: "投诉id不能为空", trigger: "blur" }
     ],
-    result: [
-      { required: true, message: "结果不能为空", trigger: "blur" }
-    ],
-    handleTime: [
-      { required: true, message: "处理时间不能为空", trigger: "blur" }
-    ],
-    handlerId: [
-      { required: true, message: "处理人id不能为空", trigger: "blur" }
-    ]
   }
 });
 
 const { queryParams, form, rules } = toRefs(data);
 
-/** 查询投诉处理信息列表 */
+/** 查询投诉处理结果列表 */
 function getList() {
   loading.value = true;
   listHandlingresults(queryParams.value).then(response => {
@@ -187,7 +178,8 @@ function reset() {
     complaintId: null,
     result: null,
     handleTime: null,
-    handlerId: null
+    handlerId: null,
+    picUrl: null
   };
   proxy.resetForm("handlingresultsRef");
 }
@@ -215,7 +207,7 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加投诉处理信息";
+  title.value = "添加投诉处理结果";
 }
 
 /** 修改按钮操作 */
@@ -225,7 +217,7 @@ function handleUpdate(row) {
   getHandlingresults(_id).then(response => {
     form.value = response.data;
     open.value = true;
-    title.value = "修改投诉处理信息";
+    title.value = "修改投诉处理结果";
   });
 }
 
@@ -253,7 +245,7 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除投诉处理信息编号为"' + _ids + '"的数据项？').then(function() {
+  proxy.$modal.confirm('是否确认删除投诉处理结果编号为"' + _ids + '"的数据项？').then(function() {
     return delHandlingresults(_ids);
   }).then(() => {
     getList();

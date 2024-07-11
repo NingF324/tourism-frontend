@@ -67,7 +67,7 @@
 
     <el-table v-loading="loading" :data="nonstarmarketingrecordsList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="营销数据id" align="center" prop="id" />
+      <el-table-column label="营销记录id" align="center" prop="id" />
       <el-table-column label="酒店id" align="center" prop="hotelId" />
       <el-table-column label="房型id" align="center" prop="roomTypeId" />
       <el-table-column label="总销量" align="center" prop="totalSales" />
@@ -87,7 +87,7 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改非星级酒店营销管理对话框 -->
+    <!-- 添加或修改非星级酒店营销记录对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="nonstarmarketingrecordsRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="酒店id" prop="hotelId">
@@ -145,7 +145,7 @@ const data = reactive({
 
 const { queryParams, form, rules } = toRefs(data);
 
-/** 查询非星级酒店营销管理列表 */
+/** 查询非星级酒店营销记录列表 */
 function getList() {
   loading.value = true;
   listNonstarmarketingrecords(queryParams.value).then(response => {
@@ -195,7 +195,7 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加非星级酒店营销管理";
+  title.value = "添加非星级酒店营销记录";
 }
 
 /** 修改按钮操作 */
@@ -205,7 +205,7 @@ function handleUpdate(row) {
   getNonstarmarketingrecords(_id).then(response => {
     form.value = response.data;
     open.value = true;
-    title.value = "修改非星级酒店营销管理";
+    title.value = "修改非星级酒店营销记录";
   });
 }
 
@@ -233,7 +233,7 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除非星级酒店营销管理编号为"' + _ids + '"的数据项？').then(function() {
+  proxy.$modal.confirm('是否确认删除非星级酒店营销记录编号为"' + _ids + '"的数据项？').then(function() {
     return delNonstarmarketingrecords(_ids);
   }).then(() => {
     getList();

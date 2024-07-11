@@ -9,14 +9,6 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="评分" prop="rating">
-        <el-input
-          v-model="queryParams.rating"
-          placeholder="请输入评分"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -67,7 +59,7 @@
 
     <el-table v-loading="loading" :data="feedbackresultsList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="投诉处理结果反馈id" align="center" prop="id" />
+      <el-table-column label="反馈id" align="center" prop="id" />
       <el-table-column label="处理结果id" align="center" prop="handleResultId" />
       <el-table-column label="评分" align="center" prop="rating" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -86,7 +78,7 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改投诉处理结果反馈对话框 -->
+    <!-- 添加或修改投诉处理反馈信息对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="feedbackresultsRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="处理结果id" prop="handleResultId">
@@ -127,7 +119,6 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     handleResultId: null,
-    rating: null
   },
   rules: {
     handleResultId: [
@@ -141,7 +132,7 @@ const data = reactive({
 
 const { queryParams, form, rules } = toRefs(data);
 
-/** 查询投诉处理结果反馈列表 */
+/** 查询投诉处理反馈信息列表 */
 function getList() {
   loading.value = true;
   listFeedbackresults(queryParams.value).then(response => {
@@ -190,7 +181,7 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加投诉处理结果反馈";
+  title.value = "添加投诉处理反馈信息";
 }
 
 /** 修改按钮操作 */
@@ -200,7 +191,7 @@ function handleUpdate(row) {
   getFeedbackresults(_id).then(response => {
     form.value = response.data;
     open.value = true;
-    title.value = "修改投诉处理结果反馈";
+    title.value = "修改投诉处理反馈信息";
   });
 }
 
@@ -228,7 +219,7 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除投诉处理结果反馈编号为"' + _ids + '"的数据项？').then(function() {
+  proxy.$modal.confirm('是否确认删除投诉处理反馈信息编号为"' + _ids + '"的数据项？').then(function() {
     return delFeedbackresults(_ids);
   }).then(() => {
     getList();

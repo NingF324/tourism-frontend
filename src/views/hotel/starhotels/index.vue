@@ -65,14 +65,19 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="starhotelsList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="starhotelsListView" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="星级酒店id" align="center" prop="id" />
+      <el-table-column label="酒店id" align="center" prop="id" />
       <el-table-column label="酒店名称" align="center" prop="name" />
-      <el-table-column label="酒店星级" align="center" prop="starLevel" />
+      <el-table-column label="星级" align="center" prop="starLevel" />
       <el-table-column label="最低价" align="center" prop="minPrice" />
-      <el-table-column label="剩余总量" align="center" prop="totalQuantity" />
+      <el-table-column label="总剩余量" align="center" prop="totalQuantity" />
       <el-table-column label="地址" align="center" prop="address" />
+      <el-table-column label="图片" align="center" prop="imageUrl" width="100">
+        <template #default="scope">
+          <image-preview :src="scope.row.imageUrl" :width="50" :height="50"/>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['hotel:starhotels:edit']">修改</el-button>
@@ -80,7 +85,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -95,17 +100,23 @@
         <el-form-item label="酒店名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入酒店名称" />
         </el-form-item>
-        <el-form-item label="酒店星级" prop="starLevel">
-          <el-input v-model="form.starLevel" placeholder="请输入酒店星级" />
+        <el-form-item label="星级" prop="starLevel">
+          <el-input v-model="form.starLevel" placeholder="请输入星级" />
         </el-form-item>
         <el-form-item label="最低价" prop="minPrice">
           <el-input v-model="form.minPrice" placeholder="请输入最低价" />
         </el-form-item>
-        <el-form-item label="剩余总量" prop="totalQuantity">
-          <el-input v-model="form.totalQuantity" placeholder="请输入剩余总量" />
+        <el-form-item label="总剩余量" prop="totalQuantity">
+          <el-input v-model="form.totalQuantity" placeholder="请输入总剩余量" />
         </el-form-item>
         <el-form-item label="地址" prop="address">
           <el-input v-model="form.address" placeholder="请输入地址" />
+        </el-form-item>
+        <el-form-item label="图片" prop="imageUrl">
+          <image-upload v-model="form.imageUrl"/>
+        </el-form-item>
+        <el-form-item label="所属人id" prop="ownerId">
+          <el-input v-model="form.ownerId" placeholder="请输入所属人id" :value="userStore.id"/>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -119,11 +130,13 @@
 </template>
 
 <script setup name="Starhotels">
-import { listStarhotels, getStarhotels, delStarhotels, addStarhotels, updateStarhotels } from "@/api/hotel/starhotels";
+import {addStarhotels, delStarhotels, getStarhotels, listStarhotels, updateStarhotels} from "@/api/hotel/starhotels";
+import useUserStore from '@/store/modules/user';
 
 const { proxy } = getCurrentInstance();
-
+const userStore = useUserStore();
 const starhotelsList = ref([]);
+const starhotelsListView = ref([]);
 const open = ref(false);
 const loading = ref(true);
 const showSearch = ref(true);
@@ -139,24 +152,27 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     name: null,
-    address: null
+    address: null,
   },
   rules: {
     name: [
       { required: true, message: "酒店名称不能为空", trigger: "blur" }
     ],
     starLevel: [
-      { required: true, message: "酒店星级不能为空", trigger: "blur" }
+      { required: true, message: "星级不能为空", trigger: "blur" }
     ],
     minPrice: [
       { required: true, message: "最低价不能为空", trigger: "blur" }
     ],
     totalQuantity: [
-      { required: true, message: "剩余总量不能为空", trigger: "blur" }
+      { required: true, message: "总剩余量不能为空", trigger: "blur" }
     ],
     address: [
       { required: true, message: "地址不能为空", trigger: "blur" }
-    ]
+    ],
+    imageUrl: [
+      { required: true, message: "图片不能为空", trigger: "blur" }
+    ],
   }
 });
 
@@ -167,8 +183,13 @@ function getList() {
   loading.value = true;
   listStarhotels(queryParams.value).then(response => {
     starhotelsList.value = response.rows;
+    // 过滤出 owner_id 为 userStore.id 的酒店信息
+    starhotelsListView.value = response.rows.filter(item => item.ownerId === userStore.id);
     total.value = response.total;
     loading.value = false;
+    if(userStore.id===1){
+      starhotelsListView.value=starhotelsList.value;
+    }
   });
 }
 
@@ -186,7 +207,9 @@ function reset() {
     starLevel: null,
     minPrice: null,
     totalQuantity: null,
-    address: null
+    address: null,
+    imageUrl: null,
+    ownerId: null
   };
   proxy.resetForm("starhotelsRef");
 }

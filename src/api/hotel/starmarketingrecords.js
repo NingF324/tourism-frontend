@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询星级酒店营销管理列表
+// 查询酒店营销记录列表
 export function listStarmarketingrecords(query) {
   return request({
     url: '/hotel/starmarketingrecords/list',
@@ -9,7 +9,7 @@ export function listStarmarketingrecords(query) {
   })
 }
 
-// 查询星级酒店营销管理详细
+// 查询酒店营销记录详细
 export function getStarmarketingrecords(id) {
   return request({
     url: '/hotel/starmarketingrecords/' + id,
@@ -17,7 +17,7 @@ export function getStarmarketingrecords(id) {
   })
 }
 
-// 新增星级酒店营销管理
+// 新增酒店营销记录
 export function addStarmarketingrecords(data) {
   return request({
     url: '/hotel/starmarketingrecords',
@@ -26,7 +26,7 @@ export function addStarmarketingrecords(data) {
   })
 }
 
-// 修改星级酒店营销管理
+// 修改酒店营销记录
 export function updateStarmarketingrecords(data) {
   return request({
     url: '/hotel/starmarketingrecords',
@@ -35,7 +35,7 @@ export function updateStarmarketingrecords(data) {
   })
 }
 
-// 删除星级酒店营销管理
+// 删除酒店营销记录
 export function delStarmarketingrecords(id) {
   return request({
     url: '/hotel/starmarketingrecords/' + id,

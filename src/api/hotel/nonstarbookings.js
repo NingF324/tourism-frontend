@@ -42,3 +42,10 @@ export function delNonstarbookings(id) {
     method: 'delete'
   })
 }
+
+export function ConfirmStarbookings(id) {
+  return request({
+    url: '/hotel/nonstarbookings/confirm/' + id,
+    method: 'delete'
+  })
+}

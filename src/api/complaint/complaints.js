@@ -42,3 +42,10 @@ export function delComplaints(id) {
     method: 'delete'
   })
 }
+
+export function confirmComplaints(id) {
+  return request({
+    url: '/complaint/complaints/confirm/' + id,
+    method: 'delete'
+  })
+}

@@ -9,10 +9,10 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="景区名称" prop="name">
+      <el-form-item label="名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入景区名称"
+          placeholder="请输入名称"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -77,8 +77,14 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="景区id" align="center" prop="id" />
       <el-table-column label="城市" align="center" prop="city" />
-      <el-table-column label="景区名称" align="center" prop="name" />
+      <el-table-column label="名称" align="center" prop="name" />
       <el-table-column label="地址" align="center" prop="address" />
+      <el-table-column label="图片" align="center" prop="picUrl" width="100">
+        <template #default="scope">
+          <image-preview :src="scope.row.picUrl" :width="50" :height="50"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="评分" align="center" prop="score" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['scenic:scenicareas:edit']">修改</el-button>
@@ -101,11 +107,17 @@
         <el-form-item label="城市" prop="city">
           <el-input v-model="form.city" placeholder="请输入城市" />
         </el-form-item>
-        <el-form-item label="景区名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入景区名称" />
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入名称" />
         </el-form-item>
         <el-form-item label="地址" prop="address">
           <el-input v-model="form.address" placeholder="请输入地址" />
+        </el-form-item>
+        <el-form-item label="图片" prop="picUrl">
+          <image-upload v-model="form.picUrl"/>
+        </el-form-item>
+        <el-form-item label="评分" prop="score">
+          <el-input v-model="form.score" placeholder="请输入评分" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -140,18 +152,18 @@ const data = reactive({
     pageSize: 10,
     city: null,
     name: null,
-    address: null
+    address: null,
   },
   rules: {
     city: [
       { required: true, message: "城市不能为空", trigger: "blur" }
     ],
     name: [
-      { required: true, message: "景区名称不能为空", trigger: "blur" }
+      { required: true, message: "名称不能为空", trigger: "blur" }
     ],
     address: [
       { required: true, message: "地址不能为空", trigger: "blur" }
-    ]
+    ],
   }
 });
 
@@ -179,7 +191,9 @@ function reset() {
     id: null,
     city: null,
     name: null,
-    address: null
+    address: null,
+    picUrl: null,
+    score: null
   };
   proxy.resetForm("scenicareasRef");
 }

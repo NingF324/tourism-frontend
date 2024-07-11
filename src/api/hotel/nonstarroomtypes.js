@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询非星级房型列表
+// 查询非星级酒店房型列表
 export function listNonstarroomtypes(query) {
   return request({
     url: '/hotel/nonstarroomtypes/list',
@@ -9,7 +9,7 @@ export function listNonstarroomtypes(query) {
   })
 }
 
-// 查询非星级房型详细
+// 查询非星级酒店房型详细
 export function getNonstarroomtypes(id) {
   return request({
     url: '/hotel/nonstarroomtypes/' + id,
@@ -17,7 +17,7 @@ export function getNonstarroomtypes(id) {
   })
 }
 
-// 新增非星级房型
+// 新增非星级酒店房型
 export function addNonstarroomtypes(data) {
   return request({
     url: '/hotel/nonstarroomtypes',
@@ -26,7 +26,7 @@ export function addNonstarroomtypes(data) {
   })
 }
 
-// 修改非星级房型
+// 修改非星级酒店房型
 export function updateNonstarroomtypes(data) {
   return request({
     url: '/hotel/nonstarroomtypes',
@@ -35,7 +35,7 @@ export function updateNonstarroomtypes(data) {
   })
 }
 
-// 删除非星级房型
+// 删除非星级酒店房型
 export function delNonstarroomtypes(id) {
   return request({
     url: '/hotel/nonstarroomtypes/' + id,

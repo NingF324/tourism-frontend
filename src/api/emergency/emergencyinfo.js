@@ -42,3 +42,10 @@ export function delEmergencyinfo(id) {
     method: 'delete'
   })
 }
+
+export function confirmEmergencyinfo(id) {
+  return request({
+    url: '/emergency/emergencyinfo/confirm/' + id,
+    method: 'delete'
+  })
+}

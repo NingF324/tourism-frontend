@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询投诉处理结果反馈列表
+// 查询投诉处理反馈信息列表
 export function listFeedbackresults(query) {
   return request({
     url: '/complaint/feedbackresults/list',
@@ -9,7 +9,7 @@ export function listFeedbackresults(query) {
   })
 }
 
-// 查询投诉处理结果反馈详细
+// 查询投诉处理反馈信息详细
 export function getFeedbackresults(id) {
   return request({
     url: '/complaint/feedbackresults/' + id,
@@ -17,7 +17,7 @@ export function getFeedbackresults(id) {
   })
 }
 
-// 新增投诉处理结果反馈
+// 新增投诉处理反馈信息
 export function addFeedbackresults(data) {
   return request({
     url: '/complaint/feedbackresults',
@@ -26,7 +26,7 @@ export function addFeedbackresults(data) {
   })
 }
 
-// 修改投诉处理结果反馈
+// 修改投诉处理反馈信息
 export function updateFeedbackresults(data) {
   return request({
     url: '/complaint/feedbackresults',
@@ -35,7 +35,7 @@ export function updateFeedbackresults(data) {
   })
 }
 
-// 删除投诉处理结果反馈
+// 删除投诉处理反馈信息
 export function delFeedbackresults(id) {
   return request({
     url: '/complaint/feedbackresults/' + id,

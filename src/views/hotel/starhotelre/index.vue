@@ -9,6 +9,22 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="评价人id" prop="guestId">
+        <el-input
+          v-model="queryParams.guestId"
+          placeholder="请输入评价人id"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="评分" prop="rating">
+        <el-input
+          v-model="queryParams.rating"
+          placeholder="请输入评分"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -22,7 +38,6 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['hotel:starhotelreviews:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -32,7 +47,6 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['hotel:starhotelreviews:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -42,7 +56,6 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['hotel:starhotelreviews:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -51,7 +64,6 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['hotel:starhotelreviews:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
@@ -59,19 +71,25 @@
 
     <el-table v-loading="loading" :data="starhotelreviewsList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="星级酒店评价id" align="center" prop="id" />
+      <el-table-column label="评价id" align="center" prop="id" />
       <el-table-column label="酒店id" align="center" prop="hotelId" />
       <el-table-column label="内容" align="center" prop="content" />
-      <el-table-column label="用户id" align="center" prop="guestId" />
+      <el-table-column label="评价人id" align="center" prop="guestId" />
       <el-table-column label="评分" align="center" prop="rating" />
+      <el-table-column label="房型" align="center" prop="roomTypeId" />
+      <el-table-column label="评价时间" align="center" prop="reviewDate" width="180">
+        <template #default="scope">
+          <span>{{ parseTime(scope.row.reviewDate, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['hotel:starhotelreviews:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['hotel:starhotelreviews:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -80,7 +98,7 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改星级酒店评价管理对话框 -->
+    <!-- 添加或修改星级酒店评价对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="starhotelreviewsRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="酒店id" prop="hotelId">
@@ -89,11 +107,22 @@
         <el-form-item label="内容">
           <editor v-model="form.content" :min-height="192"/>
         </el-form-item>
-        <el-form-item label="用户id" prop="guestId">
-          <el-input v-model="form.guestId" placeholder="请输入用户id" />
+        <el-form-item label="评价人id" prop="guestId">
+          <el-input v-model="form.guestId" placeholder="请输入评价人id" />
         </el-form-item>
         <el-form-item label="评分" prop="rating">
           <el-input v-model="form.rating" placeholder="请输入评分" />
+        </el-form-item>
+        <el-form-item label="房型" prop="roomTypeId">
+          <el-input v-model="form.roomTypeId" placeholder="请输入房型" />
+        </el-form-item>
+        <el-form-item label="评价时间" prop="reviewDate">
+          <el-date-picker clearable
+            v-model="form.reviewDate"
+            type="date"
+            value-format="YYYY-MM-DD"
+            placeholder="请选择评价时间">
+          </el-date-picker>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -127,23 +156,29 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     hotelId: null,
+    content: null,
+    guestId: null,
+    rating: null,
   },
   rules: {
+    hotelId: [
+      { required: true, message: "酒店id不能为空", trigger: "blur" }
+    ],
     content: [
       { required: true, message: "内容不能为空", trigger: "blur" }
     ],
     guestId: [
-      { required: true, message: "用户id不能为空", trigger: "blur" }
+      { required: true, message: "评价人id不能为空", trigger: "blur" }
     ],
     rating: [
       { required: true, message: "评分不能为空", trigger: "blur" }
-    ]
+    ],
   }
 });
 
 const { queryParams, form, rules } = toRefs(data);
 
-/** 查询星级酒店评价管理列表 */
+/** 查询星级酒店评价列表 */
 function getList() {
   loading.value = true;
   listStarhotelreviews(queryParams.value).then(response => {
@@ -166,7 +201,9 @@ function reset() {
     hotelId: null,
     content: null,
     guestId: null,
-    rating: null
+    rating: null,
+    roomTypeId: null,
+    reviewDate: null
   };
   proxy.resetForm("starhotelreviewsRef");
 }
@@ -194,7 +231,7 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加星级酒店评价管理";
+  title.value = "添加星级酒店评价";
 }
 
 /** 修改按钮操作 */
@@ -204,7 +241,7 @@ function handleUpdate(row) {
   getStarhotelreviews(_id).then(response => {
     form.value = response.data;
     open.value = true;
-    title.value = "修改星级酒店评价管理";
+    title.value = "修改星级酒店评价";
   });
 }
 
@@ -232,7 +269,7 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除星级酒店评价管理编号为"' + _ids + '"的数据项？').then(function() {
+  proxy.$modal.confirm('是否确认删除星级酒店评价编号为"' + _ids + '"的数据项？').then(function() {
     return delStarhotelreviews(_ids);
   }).then(() => {
     getList();

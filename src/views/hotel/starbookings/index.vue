@@ -9,10 +9,34 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="用户id" prop="guestName">
+      <el-form-item label="房型id" prop="roomTypeId">
+        <el-input
+          v-model="queryParams.roomTypeId"
+          placeholder="请输入房型id"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="预约人id" prop="guestId">
+        <el-input
+          v-model="queryParams.guestId"
+          placeholder="请输入预约人id"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="是否确认" prop="recorded">
+        <el-input
+          v-model="queryParams.recorded"
+          placeholder="请输入是否确认"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="住客姓名" prop="guestName">
         <el-input
           v-model="queryParams.guestName"
-          placeholder="请输入用户id"
+          placeholder="请输入住客姓名"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -23,64 +47,37 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="Plus"
-          @click="handleAdd"
-          v-hasPermi="['hotel:starbookings:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['hotel:starbookings:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['hotel:starbookings:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="Download"
-          @click="handleExport"
-          v-hasPermi="['hotel:starbookings:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
-
-    <el-table v-loading="loading" :data="starbookingsList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="starbookingsListView" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="星级酒店预定id" align="center" prop="id" />
       <el-table-column label="酒店id" align="center" prop="hotelId" />
       <el-table-column label="房型id" align="center" prop="roomTypeId" />
-      <el-table-column label="用户id" align="center" prop="guestName" />
-      <el-table-column label="联系电话" align="center" prop="contactNumber" />
-      <el-table-column label="是否已确认" align="center" prop="recorded" />
+      <el-table-column label="预约人id" align="center" prop="guestId" />
+      <el-table-column label="联系方式" align="center" prop="contactNumber" />
+      <el-table-column label="是否确认" align="center">
+        <template #default="scope">
+          <span>{{ scope.row.recorded === 1 ? '已确认' : '未确认' }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="开房时间" align="center" prop="checkInTime" width="180">
+        <template #default="scope">
+          <span>{{ parseTime(scope.row.checkInTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="退房时间" align="center" prop="checkOutTime" width="180">
+        <template #default="scope">
+          <span>{{ parseTime(scope.row.checkOutTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="住客姓名" align="center" prop="guestName" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['hotel:starbookings:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['hotel:starbookings:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleConfirm(scope.row)" v-hasPermi="['hotel:starbookings:confirm']">确认</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -89,7 +86,7 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改星级酒店预定对话框 -->
+    <!-- 添加或修改星级酒店预定信息对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="starbookingsRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="酒店id" prop="hotelId">
@@ -98,14 +95,36 @@
         <el-form-item label="房型id" prop="roomTypeId">
           <el-input v-model="form.roomTypeId" placeholder="请输入房型id" />
         </el-form-item>
-        <el-form-item label="用户id" prop="guestName">
-          <el-input v-model="form.guestName" placeholder="请输入用户id" />
+        <el-form-item label="预约人id" prop="guestId">
+          <el-input v-model="form.guestId" placeholder="请输入预约人id" />
         </el-form-item>
-        <el-form-item label="联系电话" prop="contactNumber">
-          <el-input v-model="form.contactNumber" placeholder="请输入联系电话" />
+        <el-form-item label="联系方式" prop="contactNumber">
+          <el-input v-model="form.contactNumber" placeholder="请输入联系方式" />
         </el-form-item>
-        <el-form-item label="是否已确认" prop="recorded">
-          <el-input v-model="form.recorded" placeholder="请输入是否已确认" />
+        <el-form-item label="是否确认" prop="recorded">
+          <el-input v-model="form.recorded" placeholder="请输入是否确认" />
+        </el-form-item>
+        <el-form-item label="开房时间" prop="checkInTime">
+          <el-date-picker clearable
+            v-model="form.checkInTime"
+            type="date"
+            value-format="YYYY-MM-DD"
+            placeholder="请选择开房时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="退房时间" prop="checkOutTime">
+          <el-date-picker clearable
+            v-model="form.checkOutTime"
+            type="date"
+            value-format="YYYY-MM-DD"
+            placeholder="请选择退房时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="住客姓名" prop="guestName">
+          <el-input v-model="form.guestName" placeholder="请输入住客姓名" />
+        </el-form-item>
+        <el-form-item label="所有人id" prop="ownerId">
+          <el-input v-model="form.ownerId" placeholder="请输入所有人id" :value="userStore.id"/>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -119,11 +138,12 @@
 </template>
 
 <script setup name="Starbookings">
-import { listStarbookings, getStarbookings, delStarbookings, addStarbookings, updateStarbookings } from "@/api/hotel/starbookings";
-
+import { listStarbookings, getStarbookings, delStarbookings, addStarbookings, updateStarbookings ,ConfirmStarbookings } from "@/api/hotel/starbookings";
+import useUserStore from '@/store/modules/user';
 const { proxy } = getCurrentInstance();
-
+const userStore = useUserStore();
 const starbookingsList = ref([]);
+const starbookingsListView = ref([]);
 const open = ref(false);
 const loading = ref(true);
 const showSearch = ref(true);
@@ -139,6 +159,9 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     hotelId: null,
+    roomTypeId: null,
+    guestId: null,
+    recorded: null,
     guestName: null,
   },
   rules: {
@@ -148,21 +171,25 @@ const data = reactive({
     roomTypeId: [
       { required: true, message: "房型id不能为空", trigger: "blur" }
     ],
-    guestName: [
-      { required: true, message: "用户id不能为空", trigger: "blur" }
+    guestId: [
+      { required: true, message: "预约人id不能为空", trigger: "blur" }
     ],
   }
 });
 
 const { queryParams, form, rules } = toRefs(data);
 
-/** 查询星级酒店预定列表 */
+/** 查询星级酒店预定信息列表 */
 function getList() {
   loading.value = true;
   listStarbookings(queryParams.value).then(response => {
     starbookingsList.value = response.rows;
+    starbookingsListView.value = response.rows.filter(item => item.ownerId === userStore.id);
     total.value = response.total;
     loading.value = false;
+    if(userStore.id === 1){
+      starbookingsListView.value = starbookingsList.value;
+    }
   });
 }
 
@@ -178,9 +205,13 @@ function reset() {
     id: null,
     hotelId: null,
     roomTypeId: null,
-    guestName: null,
+    guestId: null,
     contactNumber: null,
-    recorded: null
+    recorded: null,
+    checkInTime: null,
+    checkOutTime: null,
+    guestName: null,
+    ownerId: null
   };
   proxy.resetForm("starbookingsRef");
 }
@@ -208,7 +239,7 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加星级酒店预定";
+  title.value = "添加星级酒店预定信息";
 }
 
 /** 修改按钮操作 */
@@ -218,7 +249,7 @@ function handleUpdate(row) {
   getStarbookings(_id).then(response => {
     form.value = response.data;
     open.value = true;
-    title.value = "修改星级酒店预定";
+    title.value = "修改星级酒店预定信息";
   });
 }
 
@@ -244,13 +275,13 @@ function submitForm() {
 }
 
 /** 删除按钮操作 */
-function handleDelete(row) {
+function handleConfirm(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除星级酒店预定编号为"' + _ids + '"的数据项？').then(function() {
-    return delStarbookings(_ids);
+  proxy.$modal.confirm('是否确认星级酒店预定信息编号为"' + _ids +"的预定？").then(function() {
+    return ConfirmStarbookings(_ids);
   }).then(() => {
     getList();
-    proxy.$modal.msgSuccess("删除成功");
+    proxy.$modal.msgSuccess("确认成功");
   }).catch(() => {});
 }
 

@@ -87,7 +87,7 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改星级酒店营销管理对话框 -->
+    <!-- 添加或修改酒店营销记录对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="starmarketingrecordsRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="酒店id" prop="hotelId">
@@ -145,7 +145,7 @@ const data = reactive({
 
 const { queryParams, form, rules } = toRefs(data);
 
-/** 查询星级酒店营销管理列表 */
+/** 查询酒店营销记录列表 */
 function getList() {
   loading.value = true;
   listStarmarketingrecords(queryParams.value).then(response => {
@@ -195,7 +195,7 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加星级酒店营销管理";
+  title.value = "添加酒店营销记录";
 }
 
 /** 修改按钮操作 */
@@ -205,7 +205,7 @@ function handleUpdate(row) {
   getStarmarketingrecords(_id).then(response => {
     form.value = response.data;
     open.value = true;
-    title.value = "修改星级酒店营销管理";
+    title.value = "修改酒店营销记录";
   });
 }
 
@@ -233,7 +233,7 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除星级酒店营销管理编号为"' + _ids + '"的数据项？').then(function() {
+  proxy.$modal.confirm('是否确认删除酒店营销记录编号为"' + _ids + '"的数据项？').then(function() {
     return delStarmarketingrecords(_ids);
   }).then(() => {
     getList();

@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询星级酒店房型管理列表
+// 查询星级酒店房型列表
 export function listStarroomtypes(query) {
   return request({
     url: '/hotel/starroomtypes/list',
@@ -9,7 +9,7 @@ export function listStarroomtypes(query) {
   })
 }
 
-// 查询星级酒店房型管理详细
+// 查询星级酒店房型详细
 export function getStarroomtypes(id) {
   return request({
     url: '/hotel/starroomtypes/' + id,
@@ -17,7 +17,7 @@ export function getStarroomtypes(id) {
   })
 }
 
-// 新增星级酒店房型管理
+// 新增星级酒店房型
 export function addStarroomtypes(data) {
   return request({
     url: '/hotel/starroomtypes',
@@ -26,7 +26,7 @@ export function addStarroomtypes(data) {
   })
 }
 
-// 修改星级酒店房型管理
+// 修改星级酒店房型
 export function updateStarroomtypes(data) {
   return request({
     url: '/hotel/starroomtypes',
@@ -35,7 +35,7 @@ export function updateStarroomtypes(data) {
   })
 }
 
-// 删除星级酒店房型管理
+// 删除星级酒店房型
 export function delStarroomtypes(id) {
   return request({
     url: '/hotel/starroomtypes/' + id,

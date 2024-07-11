@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询投诉处理信息列表
+// 查询投诉处理结果列表
 export function listHandlingresults(query) {
   return request({
     url: '/complaint/handlingresults/list',
@@ -9,7 +9,7 @@ export function listHandlingresults(query) {
   })
 }
 
-// 查询投诉处理信息详细
+// 查询投诉处理结果详细
 export function getHandlingresults(id) {
   return request({
     url: '/complaint/handlingresults/' + id,
@@ -17,7 +17,7 @@ export function getHandlingresults(id) {
   })
 }
 
-// 新增投诉处理信息
+// 新增投诉处理结果
 export function addHandlingresults(data) {
   return request({
     url: '/complaint/handlingresults',
@@ -26,7 +26,7 @@ export function addHandlingresults(data) {
   })
 }
 
-// 修改投诉处理信息
+// 修改投诉处理结果
 export function updateHandlingresults(data) {
   return request({
     url: '/complaint/handlingresults',
@@ -35,7 +35,7 @@ export function updateHandlingresults(data) {
   })
 }
 
-// 删除投诉处理信息
+// 删除投诉处理结果
 export function delHandlingresults(id) {
   return request({
     url: '/complaint/handlingresults/' + id,

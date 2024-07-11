@@ -1,9 +1,13 @@
 <template>
   <section class="app-main">
-    <router-view v-slot="{ Component, route }">
+    <router-view v-slot="{ Component, route }" :key="routeKey">
       <transition name="fade-transform" mode="out-in">
         <keep-alive :include="tagsViewStore.cachedViews">
-          <component v-if="!route.meta.link" :is="Component" :key="route.path"/>
+          <component
+              v-if="!route.meta.link"
+              :is="Component"
+              :key="route.path"
+          />
         </keep-alive>
       </transition>
     </router-view>
@@ -12,10 +16,14 @@
 </template>
 
 <script setup>
-import iframeToggle from "./IframeToggle/index"
-import useTagsViewStore from '@/store/modules/tagsView'
+import { useRoute } from 'vue-router';
+import iframeToggle from './IframeToggle/index';
+import useTagsViewStore from '@/store/modules/tagsView';
+const route = useRoute();
+const routeKey = computed(() => route.path + Math.random());
 
-const tagsViewStore = useTagsViewStore()
+
+const tagsViewStore = useTagsViewStore();
 </script>
 
 <style lang="scss" scoped>

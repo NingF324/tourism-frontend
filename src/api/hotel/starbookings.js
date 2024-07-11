@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询星级酒店预定列表
+// 查询星级酒店预定信息列表
 export function listStarbookings(query) {
   return request({
     url: '/hotel/starbookings/list',
@@ -9,7 +9,7 @@ export function listStarbookings(query) {
   })
 }
 
-// 查询星级酒店预定详细
+// 查询星级酒店预定信息详细
 export function getStarbookings(id) {
   return request({
     url: '/hotel/starbookings/' + id,
@@ -17,7 +17,7 @@ export function getStarbookings(id) {
   })
 }
 
-// 新增星级酒店预定
+// 新增星级酒店预定信息
 export function addStarbookings(data) {
   return request({
     url: '/hotel/starbookings',
@@ -26,7 +26,7 @@ export function addStarbookings(data) {
   })
 }
 
-// 修改星级酒店预定
+// 修改星级酒店预定信息
 export function updateStarbookings(data) {
   return request({
     url: '/hotel/starbookings',
@@ -35,10 +35,17 @@ export function updateStarbookings(data) {
   })
 }
 
-// 删除星级酒店预定
+// 删除星级酒店预定信息
 export function delStarbookings(id) {
   return request({
     url: '/hotel/starbookings/' + id,
+    method: 'delete'
+  })
+}
+
+export function ConfirmStarbookings(id) {
+  return request({
+    url: '/hotel/starbookings/confirm/' + id,
     method: 'delete'
   })
 }

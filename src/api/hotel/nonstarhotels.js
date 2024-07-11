@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询非星级酒店管理列表
+// 查询非星级酒店列表
 export function listNonstarhotels(query) {
   return request({
     url: '/hotel/nonstarhotels/list',
@@ -9,7 +9,7 @@ export function listNonstarhotels(query) {
   })
 }
 
-// 查询非星级酒店管理详细
+// 查询非星级酒店详细
 export function getNonstarhotels(id) {
   return request({
     url: '/hotel/nonstarhotels/' + id,
@@ -17,7 +17,7 @@ export function getNonstarhotels(id) {
   })
 }
 
-// 新增非星级酒店管理
+// 新增非星级酒店
 export function addNonstarhotels(data) {
   return request({
     url: '/hotel/nonstarhotels',
@@ -26,7 +26,7 @@ export function addNonstarhotels(data) {
   })
 }
 
-// 修改非星级酒店管理
+// 修改非星级酒店
 export function updateNonstarhotels(data) {
   return request({
     url: '/hotel/nonstarhotels',
@@ -35,7 +35,7 @@ export function updateNonstarhotels(data) {
   })
 }
 
-// 删除非星级酒店管理
+// 删除非星级酒店
 export function delNonstarhotels(id) {
   return request({
     url: '/hotel/nonstarhotels/' + id,

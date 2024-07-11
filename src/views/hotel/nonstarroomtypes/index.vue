@@ -65,14 +65,20 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="nonstarroomtypesList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="nonstarroomtypesListView" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="非星级放行id" align="center" prop="id" />
+      <el-table-column label="房型id" align="center" prop="id" />
       <el-table-column label="酒店id" align="center" prop="hotelId" />
       <el-table-column label="房型名称" align="center" prop="name" />
       <el-table-column label="价格" align="center" prop="price" />
-      <el-table-column label="剩余数量" align="center" prop="quantity" />
+      <el-table-column label="剩余量" align="center" prop="quantity" />
       <el-table-column label="销量" align="center" prop="sales" />
+      <el-table-column label="图片" align="center" prop="imageUrl" width="100">
+        <template #default="scope">
+          <image-preview :src="scope.row.imageUrl" :width="50" :height="50"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="所有人id" align="center" prop="ownerId" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['hotel:nonstarroomtypes:edit']">修改</el-button>
@@ -80,7 +86,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -89,7 +95,7 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改非星级房型对话框 -->
+    <!-- 添加或修改非星级酒店房型对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="nonstarroomtypesRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="酒店id" prop="hotelId">
@@ -101,11 +107,17 @@
         <el-form-item label="价格" prop="price">
           <el-input v-model="form.price" placeholder="请输入价格" />
         </el-form-item>
-        <el-form-item label="剩余数量" prop="quantity">
-          <el-input v-model="form.quantity" placeholder="请输入剩余数量" />
+        <el-form-item label="剩余量" prop="quantity">
+          <el-input v-model="form.quantity" placeholder="请输入剩余量" />
         </el-form-item>
         <el-form-item label="销量" prop="sales">
           <el-input v-model="form.sales" placeholder="请输入销量" />
+        </el-form-item>
+        <el-form-item label="图片" prop="imageUrl">
+          <el-input v-model="form.imageUrl" placeholder="请输入图片" />
+        </el-form-item>
+        <el-form-item label="所有人id" prop="ownerId">
+          <el-input v-model="form.ownerId" placeholder="请输入所有人id" :value="userStore.id"/>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -120,10 +132,11 @@
 
 <script setup name="Nonstarroomtypes">
 import { listNonstarroomtypes, getNonstarroomtypes, delNonstarroomtypes, addNonstarroomtypes, updateNonstarroomtypes } from "@/api/hotel/nonstarroomtypes";
-
+import useUserStore from '@/store/modules/user';
 const { proxy } = getCurrentInstance();
-
+const userStore = useUserStore();
 const nonstarroomtypesList = ref([]);
+const nonstarroomtypesListView = ref([]);
 const open = ref(false);
 const loading = ref(true);
 const showSearch = ref(true);
@@ -149,20 +162,24 @@ const data = reactive({
       { required: true, message: "价格不能为空", trigger: "blur" }
     ],
     quantity: [
-      { required: true, message: "剩余数量不能为空", trigger: "blur" }
+      { required: true, message: "剩余量不能为空", trigger: "blur" }
     ],
   }
 });
 
 const { queryParams, form, rules } = toRefs(data);
 
-/** 查询非星级房型列表 */
+/** 查询非星级酒店房型列表 */
 function getList() {
   loading.value = true;
   listNonstarroomtypes(queryParams.value).then(response => {
     nonstarroomtypesList.value = response.rows;
+    nonstarroomtypesListView.value = response.rows.filter(item => item.ownerId === userStore.id);
     total.value = response.total;
     loading.value = false;
+    if(userStore.id===1){
+      nonstarroomtypesListView.value=nonstarroomtypesList.value;
+    }
   });
 }
 
@@ -180,7 +197,9 @@ function reset() {
     name: null,
     price: null,
     quantity: null,
-    sales: null
+    sales: null,
+    imageUrl: null,
+    ownerId: null
   };
   proxy.resetForm("nonstarroomtypesRef");
 }
@@ -208,7 +227,7 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加非星级房型";
+  title.value = "添加非星级酒店房型";
 }
 
 /** 修改按钮操作 */
@@ -218,7 +237,7 @@ function handleUpdate(row) {
   getNonstarroomtypes(_id).then(response => {
     form.value = response.data;
     open.value = true;
-    title.value = "修改非星级房型";
+    title.value = "修改非星级酒店房型";
   });
 }
 
@@ -246,7 +265,7 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除非星级房型编号为"' + _ids + '"的数据项？').then(function() {
+  proxy.$modal.confirm('是否确认删除非星级酒店房型编号为"' + _ids + '"的数据项？').then(function() {
     return delNonstarroomtypes(_ids);
   }).then(() => {
     getList();

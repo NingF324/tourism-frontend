@@ -9,10 +9,10 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="用户id" prop="guestName">
+      <el-form-item label="评价人" prop="guestName">
         <el-input
           v-model="queryParams.guestName"
-          placeholder="请输入用户id"
+          placeholder="请输入评价人"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -30,7 +30,6 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['entertainment:reviews:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -40,7 +39,6 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['entertainment:reviews:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -50,7 +48,6 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['entertainment:reviews:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -59,7 +56,6 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['entertainment:reviews:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
@@ -67,19 +63,19 @@
 
     <el-table v-loading="loading" :data="reviewsList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="餐饮娱乐评价id" align="center" prop="id" />
+      <el-table-column label="评价id" align="center" prop="id" />
       <el-table-column label="餐饮娱乐id" align="center" prop="diningEntertainmentId" />
       <el-table-column label="内容" align="center" prop="content" />
-      <el-table-column label="用户id" align="center" prop="guestName" />
+      <el-table-column label="评价人" align="center" prop="guestName" />
       <el-table-column label="评分" align="center" prop="rating" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['entertainment:reviews:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['entertainment:reviews:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -97,8 +93,8 @@
         <el-form-item label="内容">
           <editor v-model="form.content" :min-height="192"/>
         </el-form-item>
-        <el-form-item label="用户id" prop="guestName">
-          <el-input v-model="form.guestName" placeholder="请输入用户id" />
+        <el-form-item label="评价人" prop="guestName">
+          <el-input v-model="form.guestName" placeholder="请输入评价人" />
         </el-form-item>
         <el-form-item label="评分" prop="rating">
           <el-input v-model="form.rating" placeholder="请输入评分" />
@@ -115,7 +111,7 @@
 </template>
 
 <script setup name="Reviews">
-import { listReviews, getReviews, delReviews, addReviews, updateReviews } from "@/api/entertainment/reviews";
+import { listReviews, getReviews, delReviews, addReviews, updateReviews } from "@/api/entertainment/derev";
 
 const { proxy } = getCurrentInstance();
 
@@ -135,14 +131,18 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     diningEntertainmentId: null,
+    content: null,
     guestName: null,
   },
   rules: {
+    diningEntertainmentId: [
+      { required: true, message: "餐饮娱乐id不能为空", trigger: "blur" }
+    ],
     content: [
       { required: true, message: "内容不能为空", trigger: "blur" }
     ],
     guestName: [
-      { required: true, message: "用户id不能为空", trigger: "blur" }
+      { required: true, message: "评价人不能为空", trigger: "blur" }
     ],
     rating: [
       { required: true, message: "评分不能为空", trigger: "blur" }
@@ -251,7 +251,7 @@ function handleDelete(row) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('entertainment/reviews/export', {
+  proxy.download('entertainment/derev/export', {
     ...queryParams.value
   }, `reviews_${new Date().getTime()}.xlsx`)
 }

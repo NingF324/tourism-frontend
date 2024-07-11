@@ -1,22 +1,6 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="优先级" prop="priority">
-        <el-input
-          v-model="queryParams.priority"
-          placeholder="请输入优先级"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="景区id" prop="scenicareaId">
-        <el-input
-          v-model="queryParams.scenicareaId"
-          placeholder="请输入景区id"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -24,15 +8,6 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="Plus"
-          @click="handleAdd"
-          v-hasPermi="['emergency:emergencyinfo:add']"
-        >新增</el-button>
-      </el-col>
       <el-col :span="1.5">
         <el-button
           type="success"
@@ -53,15 +28,6 @@
           v-hasPermi="['emergency:emergencyinfo:remove']"
         >删除</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="Download"
-          @click="handleExport"
-          v-hasPermi="['emergency:emergencyinfo:export']"
-        >导出</el-button>
-      </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -74,17 +40,21 @@
           <span>{{ parseTime(scope.row.validity, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="内容" align="center" prop="content" />
-      <el-table-column label="状态" align="center" prop="status" />
-      <el-table-column label="景区id" align="center" prop="scenicareaId" />
+      <el-table-column label="文本内容" align="center" prop="content" />
+      <el-table-column label="状态" align="center">
+        <template #default="scope">
+          <span>{{ scope.row.status === 1 ? '已审批' : '未审批' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['emergency:emergencyinfo:edit']">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['emergency:emergencyinfo:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="confirm(scope.row)" v-hasPermi="['emergency:emergencyinfo:confirm']">确认</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -107,11 +77,11 @@
             placeholder="请选择截止日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="内容">
+        <el-form-item label="文本内容">
           <editor v-model="form.content" :min-height="192"/>
         </el-form-item>
-        <el-form-item label="景区id" prop="scenicareaId">
-          <el-input v-model="form.scenicareaId" placeholder="请输入景区id" />
+        <el-form-item label="状态" prop="status">
+          <el-input v-model="form.status" placeholder="请输入状态" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -125,7 +95,7 @@
 </template>
 
 <script setup name="Emergencyinfo">
-import { listEmergencyinfo, getEmergencyinfo, delEmergencyinfo, addEmergencyinfo, updateEmergencyinfo } from "@/api/emergency/emergencyinfo";
+import { listEmergencyinfo, getEmergencyinfo, delEmergencyinfo, addEmergencyinfo, updateEmergencyinfo, confirmEmergencyinfo } from "@/api/emergency/emergencyinfo";
 
 const { proxy } = getCurrentInstance();
 
@@ -144,9 +114,7 @@ const data = reactive({
   queryParams: {
     pageNum: 1,
     pageSize: 10,
-    priority: null,
     content: null,
-    scenicareaId: null
   },
   rules: {
     priority: [
@@ -156,14 +124,8 @@ const data = reactive({
       { required: true, message: "截止日期不能为空", trigger: "blur" }
     ],
     content: [
-      { required: true, message: "内容不能为空", trigger: "blur" }
+      { required: true, message: "文本内容不能为空", trigger: "blur" }
     ],
-    status: [
-      { required: true, message: "状态不能为空", trigger: "change" }
-    ],
-    scenicareaId: [
-      { required: true, message: "景区id不能为空", trigger: "blur" }
-    ]
   }
 });
 
@@ -192,8 +154,7 @@ function reset() {
     priority: null,
     validity: null,
     content: null,
-    status: null,
-    scenicareaId: null
+    status: null
   };
   proxy.resetForm("emergencyinfoRef");
 }
@@ -264,6 +225,16 @@ function handleDelete(row) {
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
+  }).catch(() => {});
+}
+
+function confirm(row) {
+  const _ids = row.id || ids.value;
+  proxy.$modal.confirm('是否确认审批通过编号为"' + _ids + '"的应急信息？').then(function() {
+    return confirmEmergencyinfo(_ids);
+  }).then(() => {
+    getList();
+    proxy.$modal.msgSuccess("审批成功");
   }).catch(() => {});
 }
 

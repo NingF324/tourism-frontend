@@ -1,10 +1,26 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="投诉人id" prop="userId">
+      <el-form-item label="酒店id" prop="hotelId">
         <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入投诉人id"
+          v-model="queryParams.hotelId"
+          placeholder="请输入酒店id"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="评价人id" prop="guestId">
+        <el-input
+          v-model="queryParams.guestId"
+          placeholder="请输入评价人id"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="评分" prop="rating">
+        <el-input
+          v-model="queryParams.rating"
+          placeholder="请输入评分"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -22,7 +38,6 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['complaint:complaints:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -32,7 +47,6 @@
           icon="Edit"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['complaint:complaints:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -42,7 +56,6 @@
           icon="Delete"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['complaint:complaints:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -51,28 +64,28 @@
           plain
           icon="Download"
           @click="handleExport"
-          v-hasPermi="['complaint:complaints:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="complaintsList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="nonstarhotelreviewsList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="投诉id" align="center" prop="id" />
+      <el-table-column label="评价id" align="center" prop="id" />
+      <el-table-column label="酒店id" align="center" prop="hotelId" />
       <el-table-column label="内容" align="center" prop="content" />
-      <el-table-column label="投诉时间" align="center" prop="submitTime" width="180">
+      <el-table-column label="评价人id" align="center" prop="guestId" />
+      <el-table-column label="评分" align="center" prop="rating" />
+      <el-table-column label="房型id" align="center" prop="roomTypeId" />
+      <el-table-column label="评价时间" align="center" prop="reviewDate" width="180">
         <template #default="scope">
-          <span>{{ parseTime(scope.row.submitTime, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.reviewDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" prop="status" />
-      <el-table-column label="投诉人id" align="center" prop="userId" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['complaint:complaints:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['complaint:complaints:remove']">删除</el-button>
-          <el-button link type="primary" icon="Edit" @click="handleConfirm(scope.row)" v-hasPermi="['complaint:complaints:confirm']">确认</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -85,22 +98,31 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改投诉信息对话框 -->
+    <!-- 添加或修改非星级酒店评价对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="complaintsRef" :model="form" :rules="rules" label-width="80px">
+      <el-form ref="nonstarhotelreviewsRef" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="酒店id" prop="hotelId">
+          <el-input v-model="form.hotelId" placeholder="请输入酒店id" />
+        </el-form-item>
         <el-form-item label="内容">
           <editor v-model="form.content" :min-height="192"/>
         </el-form-item>
-        <el-form-item label="投诉时间" prop="submitTime">
+        <el-form-item label="评价人id" prop="guestId">
+          <el-input v-model="form.guestId" placeholder="请输入评价人id" />
+        </el-form-item>
+        <el-form-item label="评分" prop="rating">
+          <el-input v-model="form.rating" placeholder="请输入评分" />
+        </el-form-item>
+        <el-form-item label="房型id" prop="roomTypeId">
+          <el-input v-model="form.roomTypeId" placeholder="请输入房型id" />
+        </el-form-item>
+        <el-form-item label="评价时间" prop="reviewDate">
           <el-date-picker clearable
-            v-model="form.submitTime"
+            v-model="form.reviewDate"
             type="date"
             value-format="YYYY-MM-DD"
-            placeholder="请选择投诉时间">
+            placeholder="请选择评价时间">
           </el-date-picker>
-        </el-form-item>
-        <el-form-item label="投诉人id" prop="userId">
-          <el-input v-model="form.userId" placeholder="请输入投诉人id" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -113,12 +135,12 @@
   </div>
 </template>
 
-<script setup name="Complaints">
-import { listComplaints, getComplaints, delComplaints, addComplaints, updateComplaints , confirmComplaints } from "@/api/complaint/complaints";
+<script setup name="Nonstarhotelreviews">
+import { listNonstarhotelreviews, getNonstarhotelreviews, delNonstarhotelreviews, addNonstarhotelreviews, updateNonstarhotelreviews } from "@/api/hotel/nonstarhotelreviews";
 
 const { proxy } = getCurrentInstance();
 
-const complaintsList = ref([]);
+const nonstarhotelreviewsList = ref([]);
 const open = ref(false);
 const loading = ref(true);
 const showSearch = ref(true);
@@ -133,29 +155,34 @@ const data = reactive({
   queryParams: {
     pageNum: 1,
     pageSize: 10,
+    hotelId: null,
     content: null,
-    userId: null
+    guestId: null,
+    rating: null,
   },
   rules: {
+    hotelId: [
+      { required: true, message: "酒店id不能为空", trigger: "blur" }
+    ],
     content: [
       { required: true, message: "内容不能为空", trigger: "blur" }
     ],
-    submitTime: [
-      { required: true, message: "投诉时间不能为空", trigger: "blur" }
+    guestId: [
+      { required: true, message: "评价人id不能为空", trigger: "blur" }
     ],
-    status: [
-      { required: true, message: "状态不能为空", trigger: "change" }
+    rating: [
+      { required: true, message: "评分不能为空", trigger: "blur" }
     ],
   }
 });
 
 const { queryParams, form, rules } = toRefs(data);
 
-/** 查询投诉信息列表 */
+/** 查询非星级酒店评价列表 */
 function getList() {
   loading.value = true;
-  listComplaints(queryParams.value).then(response => {
-    complaintsList.value = response.rows;
+  listNonstarhotelreviews(queryParams.value).then(response => {
+    nonstarhotelreviewsList.value = response.rows;
     total.value = response.total;
     loading.value = false;
   });
@@ -171,12 +198,14 @@ function cancel() {
 function reset() {
   form.value = {
     id: null,
+    hotelId: null,
     content: null,
-    submitTime: null,
-    status: null,
-    userId: null
+    guestId: null,
+    rating: null,
+    roomTypeId: null,
+    reviewDate: null
   };
-  proxy.resetForm("complaintsRef");
+  proxy.resetForm("nonstarhotelreviewsRef");
 }
 
 /** 搜索按钮操作 */
@@ -202,32 +231,32 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加投诉信息";
+  title.value = "添加非星级酒店评价";
 }
 
 /** 修改按钮操作 */
 function handleUpdate(row) {
   reset();
   const _id = row.id || ids.value
-  getComplaints(_id).then(response => {
+  getNonstarhotelreviews(_id).then(response => {
     form.value = response.data;
     open.value = true;
-    title.value = "修改投诉信息";
+    title.value = "修改非星级酒店评价";
   });
 }
 
 /** 提交按钮 */
 function submitForm() {
-  proxy.$refs["complaintsRef"].validate(valid => {
+  proxy.$refs["nonstarhotelreviewsRef"].validate(valid => {
     if (valid) {
       if (form.value.id != null) {
-        updateComplaints(form.value).then(response => {
+        updateNonstarhotelreviews(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
           open.value = false;
           getList();
         });
       } else {
-        addComplaints(form.value).then(response => {
+        addNonstarhotelreviews(form.value).then(response => {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;
           getList();
@@ -240,8 +269,8 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除投诉信息编号为"' + _ids + '"的数据项？').then(function() {
-    return delComplaints(_ids);
+  proxy.$modal.confirm('是否确认删除非星级酒店评价编号为"' + _ids + '"的数据项？').then(function() {
+    return delNonstarhotelreviews(_ids);
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
@@ -250,20 +279,9 @@ function handleDelete(row) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('complaint/complaints/export', {
+  proxy.download('hotel/nonstarhotelreviews/export', {
     ...queryParams.value
-  }, `complaints_${new Date().getTime()}.xlsx`)
-}
-
-/** 删除按钮操作 */
-function handleConfirm(row) {
-  const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认通过投诉信息编号为"' + _ids + '"的审批？').then(function() {
-    return confirmComplaints(_ids);
-  }).then(() => {
-    getList();
-    proxy.$modal.msgSuccess("审批成功");
-  }).catch(() => {});
+  }, `nonstarhotelreviews_${new Date().getTime()}.xlsx`)
 }
 
 getList();
