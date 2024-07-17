@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询景点信息管理列表
+// 查询景点信息列表
 export function listScenicspots(query) {
   return request({
     url: '/scenic/scenicspots/list',
@@ -9,7 +9,7 @@ export function listScenicspots(query) {
   })
 }
 
-// 查询景点信息管理详细
+// 查询景点信息详细
 export function getScenicspots(id) {
   return request({
     url: '/scenic/scenicspots/' + id,
@@ -17,7 +17,7 @@ export function getScenicspots(id) {
   })
 }
 
-// 新增景点信息管理
+// 新增景点信息
 export function addScenicspots(data) {
   return request({
     url: '/scenic/scenicspots',
@@ -26,7 +26,7 @@ export function addScenicspots(data) {
   })
 }
 
-// 修改景点信息管理
+// 修改景点信息
 export function updateScenicspots(data) {
   return request({
     url: '/scenic/scenicspots',
@@ -35,7 +35,7 @@ export function updateScenicspots(data) {
   })
 }
 
-// 删除景点信息管理
+// 删除景点信息
 export function delScenicspots(id) {
   return request({
     url: '/scenic/scenicspots/' + id,

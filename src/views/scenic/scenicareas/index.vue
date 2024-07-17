@@ -85,6 +85,7 @@
         </template>
       </el-table-column>
       <el-table-column label="评分" align="center" prop="score" />
+      <el-table-column label="描述" align="center" prop="desc" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['scenic:scenicareas:edit']">修改</el-button>
@@ -118,6 +119,9 @@
         </el-form-item>
         <el-form-item label="评分" prop="score">
           <el-input v-model="form.score" placeholder="请输入评分" />
+        </el-form-item>
+        <el-form-item label="描述" prop="desc">
+          <el-input v-model="form.desc" type="textarea" placeholder="请输入内容" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -193,7 +197,8 @@ function reset() {
     name: null,
     address: null,
     picUrl: null,
-    score: null
+    score: null,
+    desc: null
   };
   proxy.resetForm("scenicareasRef");
 }
