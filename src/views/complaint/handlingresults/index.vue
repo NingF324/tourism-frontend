@@ -67,7 +67,7 @@
           <span>{{ parseTime(scope.row.handleTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="处理人id" align="center" prop="handlerId" />
+      <el-table-column label="工号" align="center" prop="handlerId" />
       <el-table-column label="图片" align="center" prop="picUrl" width="100">
         <template #default="scope">
           <image-preview :src="scope.row.picUrl" :width="50" :height="50"/>
@@ -106,7 +106,7 @@
             placeholder="请选择处理时间">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="处理人id" prop="handlerId">
+        <el-form-item label="工号" prop="handlerId">
           <el-input v-model="form.handlerId" placeholder="请输入处理人id" />
         </el-form-item>
         <el-form-item label="图片" prop="picUrl">

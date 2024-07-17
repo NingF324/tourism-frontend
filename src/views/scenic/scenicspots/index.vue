@@ -84,7 +84,7 @@
           <image-preview :src="scope.row.picUrl" :width="50" :height="50"/>
         </template>
       </el-table-column>
-      <el-table-column label="描述" align="center" prop="desc" />
+      <el-table-column label="描述" align="center" prop="description" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['scenic:scenicspots:edit']">修改</el-button>
@@ -116,8 +116,8 @@
         <el-form-item label="图片" prop="picUrl">
           <image-upload v-model="form.picUrl"/>
         </el-form-item>
-        <el-form-item label="描述" prop="desc">
-          <el-input v-model="form.desc" type="textarea" placeholder="请输入内容" />
+        <el-form-item label="描述" prop="description">
+          <el-input v-model="form.description" type="textarea" placeholder="请输入内容" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -187,7 +187,7 @@ function reset() {
     address: null,
     name: null,
     picUrl: null,
-    desc: null
+    description: null
   };
   proxy.resetForm("scenicspotsRef");
 }
