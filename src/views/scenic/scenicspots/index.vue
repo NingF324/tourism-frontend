@@ -71,6 +71,11 @@
       <el-table-column label="景区id" align="center" prop="scenicAreaId" />
       <el-table-column label="地址" align="center" prop="address" />
       <el-table-column label="景点名称" align="center" prop="name" />
+      <el-table-column label="图片" align="center" prop="picUrl" width="100">
+        <template #default="scope">
+          <image-preview :src="scope.row.picUrl" :width="50" :height="50"/>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['scenic:scenicspots:edit']">修改</el-button>
@@ -87,7 +92,7 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改景点信息对话框 -->
+    <!-- 添加或修改景点信息管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="scenicspotsRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="景区id" prop="scenicAreaId">
@@ -98,6 +103,9 @@
         </el-form-item>
         <el-form-item label="景点名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入景点名称" />
+        </el-form-item>
+        <el-form-item label="图片" prop="picUrl">
+          <image-upload v-model="form.picUrl"/>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -131,7 +139,7 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     address: null,
-    name: null
+    name: null,
   },
   rules: {
     address: [
@@ -142,7 +150,7 @@ const data = reactive({
 
 const { queryParams, form, rules } = toRefs(data);
 
-/** 查询景点信息列表 */
+/** 查询景点信息管理列表 */
 function getList() {
   loading.value = true;
   listScenicspots(queryParams.value).then(response => {
@@ -164,7 +172,8 @@ function reset() {
     id: null,
     scenicAreaId: null,
     address: null,
-    name: null
+    name: null,
+    picUrl: null
   };
   proxy.resetForm("scenicspotsRef");
 }
@@ -192,7 +201,7 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加景点信息";
+  title.value = "添加景点信息管理";
 }
 
 /** 修改按钮操作 */
@@ -202,7 +211,7 @@ function handleUpdate(row) {
   getScenicspots(_id).then(response => {
     form.value = response.data;
     open.value = true;
-    title.value = "修改景点信息";
+    title.value = "修改景点信息管理";
   });
 }
 
@@ -230,7 +239,7 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除景点信息编号为"' + _ids + '"的数据项？').then(function() {
+  proxy.$modal.confirm('是否确认删除景点信息管理编号为"' + _ids + '"的数据项？').then(function() {
     return delScenicspots(_ids);
   }).then(() => {
     getList();
