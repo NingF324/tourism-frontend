@@ -79,7 +79,11 @@
       <el-table-column label="景区id" align="center" prop="scenicAreaId" />
       <el-table-column label="地址" align="center" prop="address" />
       <el-table-column label="景点名称" align="center" prop="name" />
-      <el-table-column label="图片" align="center" prop="picUrl" />
+      <el-table-column label="图片" align="center" prop="picUrl" width="100">
+        <template #default="scope">
+          <image-preview :src="scope.row.picUrl" :width="50" :height="50"/>
+        </template>
+      </el-table-column>
       <el-table-column label="描述" align="center" prop="desc" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
@@ -110,7 +114,7 @@
           <el-input v-model="form.name" placeholder="请输入景点名称" />
         </el-form-item>
         <el-form-item label="图片" prop="picUrl">
-          <el-input v-model="form.picUrl" placeholder="请输入图片" />
+          <image-upload v-model="form.picUrl"/>
         </el-form-item>
         <el-form-item label="描述" prop="desc">
           <el-input v-model="form.desc" type="textarea" placeholder="请输入内容" />
